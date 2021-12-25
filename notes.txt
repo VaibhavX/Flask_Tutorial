@@ -1,0 +1,160 @@
+Ch 1: Hello World !
+
+
+app > __init__.py
+from flask import Flask
+app = Flask(__name__)
+from app import routes
+
+---> routes is a python file inside package app
+
+routes -> different URL that the application implements
+routes.py ---> it has handlers for view function, for each URL route, we define a function and what happens when user reaches that function point.
+
+from app import app
+@app.route('/') -> decorators
+@app.route('/index') -> decorators, it modifies the function that follows it which is here index()
+def index():
+  return "Hello, World!"
+
+
+  Finally we have microblog.py (main file name which will be invoked)
+  from app import app
+
+  Running the application:-
+  export FLASK_APP = microblog.py
+  flask run
+
+  Ch 2: Templates
+  Creating a dictionary -> user = {'username':'Sunny'} //mock user
+  Add to routes.py
+  from app import app
+  @app.route('/')
+  @app.route('/index')
+  def index():
+    user = {'username','Sunny Lopez'}
+    return '''
+  <html>
+    <head>
+      <title>Home Page - Micorblog</title>
+    </head>
+    <body>
+      <h1>Hello, ''' + user['username'] + '''!</h1>
+    </body>
+  </html>'''
+
+
+  Adding Scaling feature to the application -> all templates should be in a separate folder under app and function calls should be made to those Templates
+  Inside the foler 'template' - first adding the index.html as the starting point for the function index() defined in routes.py
+
+  app > templates > index.html
+(We are also using placeholders "{{}}")
+
+<html>
+  <head>
+    <title>{{title}} - Microblog!</title>
+  </head>
+  <body>
+    <h1>Hello, {{user.username}}!</h1>
+  </body>
+</html>
+
+Changes to routes.py
+from flask import render_template //adding new import package entry
+import app from app
+@app.route('/')
+@app.route('/index')
+def index():
+  user = {'username':'Sunny Lopez'}
+
+return render_template('index.html', title ='Home', user=user)
+
+#Adding conditional statements to the existing templates using {%  %}
+index.html
+<html>
+  <head>
+    {% if title %}
+    <title>{{title}} - Microblog</title>
+    {% else %}
+    <title>Welcome to Microblog</title>
+    {% endif %}
+  </head>
+  <body>
+    <h1>Hello, {{user.username}}!</h1>
+  </body>
+</html>
+
+#Adding Loops
+Loops are added when there are lines that need to be repeated on the webpage.
+For this exercise, we can add a dictionary and then added the for loop in index.html
+
+Changes to routes.py
+from flask import render_template
+import app from app
+@app.route('/')
+@app.route('/index')
+def index():
+  user = {'username' : 'Sunny Lopez'}
+  posts = [
+    {
+      'author' = {'username': 'Sunny'},
+      'body' = 'Meow!'
+    },
+    {
+      'author' = {'username': 'Bunny'},
+      'body' = 'Meow and Hop'
+    }
+  ]
+return render_template('index.html', title = 'Home', user = user, posts = posts)
+
+Changes to index.html
+<html>
+  <head>
+    {% if title %}
+    <title>{{title}} - Microblog</title>
+    {% else %}
+    <title>Welcome to Microblog</title>
+    {% endif %}
+  </head>
+  <body>
+    <h1>Hello, {{user.username}}!</h1>
+    {% for post in posts %}
+    <div><p>{{ post.author.username }} says {{ post.body }} </p></div>
+    {% endfor %}
+  </body>
+</html>
+
+### Template Inheritance - Navigation Bar
+This is basically added to create a navigation bar for the website
+Using {% extends .... %} and {% block content %} .... {% endblock %}
+
+We create a base.html
+<html>
+  <head>
+  {% if title %}
+  <title>{{title}} - Micorblog</title>
+  {% else %}
+  <title>Welcome to Microblog</title>
+  {% endif %}
+  <body>
+  <div>Microblog <a href="/index">Home</a></div>
+  <hr>
+  {% block content %}{% endblock %}
+  </body>
+</html>
+
+Based on this -> index.html changes as the base structure is moved to base.html
+index.html
+------
+{% extends "base.html"}
+
+{% block content %}
+<h1>Hello! {{user.username}}</h1>
+{% for post in posts %}
+<div><p>{{post.author.username}} says: <b>{{post.body}}</b></p></div>
+{% endfor %}
+{% endblock %}
+
+########
+
+Chapter 3: Web Forms
